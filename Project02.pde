@@ -1,43 +1,54 @@
-//haha go fuck yourself
+/*
+ * Verlet Integration - stable Form
+ * Pos  = pos + (pos-posOld)
+ * alternative to  x += speed
+ */
 
-int rad = 60;        // Width of the shape
-float xpos, ypos;    // Starting position of shape    
+int particles = 1200;
+VerletBall[] balls = new VerletBall[particles];
 
-float xspeed = 2.8;  // Speed of the shape
-float yspeed = 2.2;  // Speed of the shape
+int bonds = particles + particles/2;
+VerletStick[] sticks = new VerletStick[bonds];
 
-int xdirection = 1;  // Left or Right
-int ydirection = 1;  // Top to Bottom
+void setup() {
+  size(600, 600);
+  float theta = PI/4.0;
+  float shapeR = 100;
+  float tension = 0.8;
+  // balls
+  for (int i=0; i<particles; i++) {
+    PVector push = new PVector(random(1, 3.5), random(1, 3.5));
+    PVector p = new PVector(width/2+cos(theta)*shapeR, height/2+sin(theta)*shapeR);
+    balls[i] = new VerletBall(p, push, 2);
+    theta += TWO_PI/particles;
+  }
 
+  // sticks
+  for (int i=0; i<particles; i++) {
+    if (i>0) {
+      sticks[i-1] = new VerletStick(balls[i-1], balls[i], tension);
+    } 
+    if (i==particles-1) {
+      sticks[i] = new VerletStick(balls[i], balls[0], tension);
+    }
+  }
 
-void setup() 
-{
-  size(2000, 1000);
-  noStroke();
-  frameRate(30);
-  ellipseMode(RADIUS);
-  // Set the starting position of the shape
-  xpos = width/2;
-  ypos = height/2;
+  // internal sticks for stability
+  for (int i=particles; i<bonds; i++) {
+    sticks[i] = new VerletStick(balls[i-particles], balls[i-particles/2], tension);
+  }
 }
 
-void draw() 
-{
-  background(0);
-  
-  // Update the position of the shape
-  xpos = xpos + ( xspeed * xdirection );
-  ypos = ypos + ( yspeed * ydirection );
-  
-  // Test to see if the shape exceeds the boundaries of the screen
-  // If it does, reverse its direction by multiplying by -1
-  if (xpos > width-rad || xpos < rad) {
-    xdirection *= -1;
-  }
-  if (ypos > height-rad || ypos < rad) {
-    ydirection *= -1;
+void draw() {
+  background(255);
+  for (int i=0; i<bonds; i++) {
+   // sticks[i].render();
+    sticks[i].constrainLen();
   }
 
-  // Draw the shape
-  ellipse(xpos, ypos, rad, rad);
+  for (int i=0; i<particles; i++) {
+    balls[i].verlet();
+    balls[i].render();
+    balls[i].boundsCollision();
+  }
 }
