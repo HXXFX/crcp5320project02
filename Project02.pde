@@ -4,7 +4,7 @@
  * alternative to  x += speed
  */
 
-int particles = 1200;
+int particles = 2500;
 VerletBall[] balls = new VerletBall[particles];
 
 int bonds = particles + particles/2;
@@ -14,10 +14,10 @@ void setup() {
   size(600, 600);
   float theta = PI/4.0;
   float shapeR = 100;
-  float tension = 0.8;
+  float tension = 0.9;
   // balls
   for (int i=0; i<particles; i++) {
-    PVector push = new PVector(random(1, 3.5), random(1, 3.5));
+    PVector push = new PVector(random(5, 5.5), random(5, 5.5));
     PVector p = new PVector(width/2+cos(theta)*shapeR, height/2+sin(theta)*shapeR);
     balls[i] = new VerletBall(p, push, 2);
     theta += TWO_PI/particles;
@@ -51,4 +51,6 @@ void draw() {
     balls[i].render();
     balls[i].boundsCollision();
   }
+  
+
 }
